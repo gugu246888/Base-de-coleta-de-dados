@@ -1,0 +1,100 @@
+
+import sqlite3
+
+# Conexão com o banco de dados
+conexao = sqlite3.connect("dados.db")
+cursor = conexao.cursor()
+
+# Criar tabela
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS registros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    informacao TEXT,
+    categoria TEXT
+)
+""")
+
+conexao.commit()
+
+
+# 1. Cadastrar dados
+def coletar_dados():
+    nome = input("Nome: ")
+    informacao = input("Informação: ")
+    categoria = input("Categoria: ")
+
+    cursor.execute("""
+    INSERT INTO registros (nome, informacao, categoria)
+    VALUES (?, ?, ?)
+    """, (nome, informacao, categoria))
+
+    conexao.commit()
+    print("Dados armazenados com sucesso!")
+
+
+# 2. Consultar dados
+def consultar_dados():
+    cursor.execute("SELECT * FROM registros")
+    dados = cursor.fetchall()
+
+    for registro in dados:
+        print(registro)
+
+
+# 3. Pesquisar por nome
+def pesquisar_dados():
+    nome = input("Digite o nome para pesquisar: ")
+
+    cursor.execute(
+        "SELECT * FROM registros WHERE nome LIKE ?",
+        ('%' + nome + '%',)
+    )
+
+    for registro in cursor.fetchall():
+        print(registro)
+
+
+# 4. Excluir dados
+def excluir_dados():
+    id_registro = input("ID do registro: ")
+
+    cursor.execute(
+        "DELETE FROM registros WHERE id = ?",
+        (id_registro,)
+    )
+
+    conexao.commit()
+    print("Operação concluída!")
+
+
+# Menu principal
+def iniciar_sistema():
+    while True:
+        print("\n===== SISTEMA DE DADOS =====")
+        print("1 - Coletar e armazenar")
+        print("2 - Consultar registros")
+        print("3 - Pesquisar")
+        print("4 - Excluir registro")
+        print("0 - Sair")
+
+        opcao = input("Escolha: ")
+
+        if opcao == "1":
+            coletar_dados()
+        elif opcao == "2":
+            consultar_dados()
+        elif opcao == "3":
+            pesquisar_dados()
+        elif opcao == "4":
+            excluir_dados()
+        elif opcao == "0":
+            break
+        else:
+            print("Opção inválida!")
+
+    conexao.close()
+    print("Sistema encerrado.")
+
+
+iniciar_sistema()
